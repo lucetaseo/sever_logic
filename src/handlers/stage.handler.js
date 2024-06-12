@@ -1,14 +1,15 @@
 import { getStage, setStage } from '../models/stage.model.js';
 import { getGameAssets } from '../init/assets.js';
 import fs from 'fs';
-import path from 'path';
+import { fileURLToPath } from 'url';
+import path, { dirname } from 'path'; 
 
-
-const stageSettingsPath = path.join(__dirname, '../../assets/Stage.json');
-
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const basePath = path.join(__dirname, 'assets');
 const loadStageSettings = () => {
   try {
-    const data = fs.readFileSync(stageSettingsPath);
+    const data = fs.readFileSync(path.join(basePath, 'Stage.json'));
     return JSON.parse(data);
   } catch (error) {
     console.error('Failed to load stage settings:', error);
