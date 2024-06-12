@@ -10,35 +10,36 @@ class Score {
     this.ctx = ctx;
     this.canvas = ctx.canvas;
     this.scaleRatio = scaleRatio;
-    this.loadStageData();
-    this.loadItemData();
+    this.loadStageData()
+      .then(() => this.loadItemData())
+      .catch(error => console.error('Failed to initialize Score:', error));
   }
 
   async loadStageData() {
     try {
-      const response = await fep('./assets/Stage.json');
-      const data = await response.json();
-      this.stageData = data.data; 
+      const response = await fetch('./assets/Stage.json', {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      this.stageData = await response.json();
     } catch (error) {
       console.error('Failed to load stage data:', error);
     }
   }
 
+  getCurrentStageData() {
+    const stage = this.stageData.data.find(stage => stage.id === this.stageId);
+    return stage || { score: 0, scoreMultiplier: 1 };
+  }
+
   async loadItemData() {
     try {
       const response = await fetch('./assets/Item.json');
-      const data = await response.json();
-      this.items = data.data;
+      this.itemData = await response.json();
     } catch (error) {
       console.error('Failed to load item data:', error);
     }
-  }
-
-
-
-  // 현재 스테이지 ID에 해당하는 데이터를 반환
-  getCurrentStageData() {
-    return this.stageData.find(stage => stage.id === this.stageId) || { score: 0, scoreMultiplier: 1 };
   }
 
   getItem(itemId) {
