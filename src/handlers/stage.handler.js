@@ -1,27 +1,5 @@
 import { getStage, setStage } from '../models/stage.model.js';
 import { getGameAssets } from '../init/assets.js';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
-import path, { dirname } from 'path'; 
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const basePath = path.join(__dirname, 'assets');
-const loadStageSettings = () => {
-  try {
-    const data = fs.readFileSync(path.join(basePath, 'Stage.json'));
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('Failed to load stage settings:', error);
-    return [];
-  }
-};
-
-export const getStageSettings = (stageId) => {
-  const stageSettings = loadStageSettings();
-  const stage = stageSettings.find(stage => stage.id === stageId);
-  return stage || null;
-};
 
 export const moveStageHandler = (userId, payload) => {
   // 유저의 현재 스테이지 배열을 가져오고, 최대 스테이지 ID를 찾는다.
