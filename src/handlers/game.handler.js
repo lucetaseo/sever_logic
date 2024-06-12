@@ -2,9 +2,12 @@ import { getGameAssets } from '../init/assets.js';
 import { getStage, setStage } from '../models/stage.model.js';
 
 export const gameStart = (uuid, payload) => {
-  const { stage } = getGameAssets();
-  setStage(uuid, stage.data[0].id, payload.timestamp);
-  console.log('Stage:', getStage(uuid));
+   // 서버 메모리에 있는 게임 에셋에서 stage 정보를 가지고 온다.
+   const { stages } = getGameAssets();
+   // stages 배열에서 0번째 = 첫번째스테이지 의 ID를 해당 유저의 stage에 저장한다.
+   setStage(uuid, stages.data[0].id,payload.timestamp);
+   // 로그를 찍어 확인.
+   console.log('Stage:', getStage(uuid));
 
   return { status: 'success' };
 };
@@ -32,7 +35,7 @@ export const gameEnd = (uuid, payload) => {
     const stageDuration = (stageEndTime - stage.timestamp) / 1000; // 스테이지 지속 시간 (초 단위)
     totalScore += stageDuration; // 1초당 1점
   });
-
+ 
   // 점수와 타임스탬프 검증 (예: 클라이언트가 보낸 총점과 계산된 총점 비교)
   // 오차범위 5
   if (Math.abs(score - totalScore) > 5) {

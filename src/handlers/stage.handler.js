@@ -8,11 +8,12 @@ export const moveStageHandler = (userId, payload) => {
     return { status: 'fail', message: 'No stages found for user' };
   }
 
+
   // 오름차순 정렬 후 가장 큰 스테이지 ID 확인 = 가장 상위의 스테이지 = 현재 스테이지
   currentStages.sort((a, b) => a.id - b.id);
   const currentStage = currentStages[currentStages.length - 1];
 
-  // payload 의 currentStage 와 비교
+  // 클라이언트 서버 비교
   if (currentStage.id !== payload.currentStage) {
     return { status: 'fail', message: 'Current stage mismatch' };
   }
@@ -31,13 +32,11 @@ export const moveStageHandler = (userId, payload) => {
   // 게임 에셋에서 다음 스테이지의 존재 여부 확인
   const { stages } = getGameAssets();
   if (!stages.data.some((stage) => stage.id === payload.targetStage)) {
-    return { status: 'fail', message: 'Target stage does not exist' };
+    return { status: 'fail', message: 'Target stage not found' };
   }
 
   // 유저의 다음 스테이지 정보 업데이트 + 현재 시간
   setStage(userId, payload.targetStage, serverTime);
   return { status: 'success' };
+
 };
-
-
-

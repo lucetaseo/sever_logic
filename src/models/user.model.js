@@ -1,4 +1,3 @@
-// model/user.model.js
 const users = [];
 
 export const addUser = (user) => {

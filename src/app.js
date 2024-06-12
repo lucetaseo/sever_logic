@@ -10,7 +10,7 @@ const PORT = 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-//app.use(express.static('public'));
+app.use(express.static('public'));
 initSocket(server);
 
 app.get('/', (req, res) => {
@@ -24,7 +24,7 @@ server.listen(PORT, async () => {
     const assets = await loadGameAssets();
     console.log(assets);
     console.log('Assets loaded successfully');
-  } catch (error) {
-    console.error('Failed to load game assets:', error);
+  } catch (e) {
+    console.error('Failed to load game assets:', e);
   }
 });
