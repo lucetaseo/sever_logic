@@ -9,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 
 const __dirname = path.dirname(__filename);
 const basePath = path.join(__dirname, '../../assets');
-
+let gameAssets = {};
 
 const readFileAsync = (filename) => {
   return new Promise((resolve, rejects)  => {
@@ -23,7 +23,7 @@ const readFileAsync = (filename) => {
   });
 };
 
-let gameAssets = {};
+
 
 export const loadGameAssets = async () => {
   try{

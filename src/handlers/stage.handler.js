@@ -1,5 +1,26 @@
 import { getStage, setStage } from '../models/stage.model.js';
 import { getGameAssets } from '../init/assets.js';
+import fs from 'fs';
+import path from 'path';
+
+
+const stageSettingsPath = path.join(__dirname, '../../assets/Stage.json');
+
+const loadStageSettings = () => {
+  try {
+    const data = fs.readFileSync(stageSettingsPath);
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('Failed to load stage settings:', error);
+    return [];
+  }
+};
+
+export const getStageSettings = (stageId) => {
+  const stageSettings = loadStageSettings();
+  const stage = stageSettings.find(stage => stage.id === stageId);
+  return stage || null;
+};
 
 export const moveStageHandler = (userId, payload) => {
   // 유저의 현재 스테이지 배열을 가져오고, 최대 스테이지 ID를 찾는다.
@@ -24,7 +45,7 @@ export const moveStageHandler = (userId, payload) => {
   // 1초당 1점, 100점이상 다음스테이지 이동, 오차범위 5
   // 클라이언트와 서버 간의 통신 지연시간을 고려해서 오차범위 설정
   // elapsedTime 은 100 이상 105 이하 일 경우만 통과
-  if (elapsedTime < 10 || elapsedTime > 10.5) {
+  if (elapsedTime < 100 || elapsedTime > 105) {
     return { status: 'fail', message: 'Invalid elapsed time' };
   }
 
@@ -38,3 +59,6 @@ export const moveStageHandler = (userId, payload) => {
   setStage(userId, payload.targetStage, serverTime);
   return { status: 'success' };
 };
+
+
+
