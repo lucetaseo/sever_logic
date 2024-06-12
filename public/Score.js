@@ -1,28 +1,72 @@
 class Score {
   score = 0;
   HIGH_SCORE_KEY = 'highScore';
+  stageId = 1000; // 기본 스테이지 ID
+  stageChange = true; // 스테이지 변경 가능 여부 초기화
+  stageData = [];
+  items = [];
 
   constructor(ctx, scaleRatio) {
     this.ctx = ctx;
     this.canvas = ctx.canvas;
     this.scaleRatio = scaleRatio;
+    this.loadStageData();
+    this.loadItemData();
+  }
+
+  async loadStageData() {
+    try {
+      const response = await fep('./assets/Stage.json');
+      const data = await response.json();
+      this.stageData = data.data; 
+    } catch (error) {
+      console.error('Failed to load stage data:', error);
+    }
+  }
+
+  async loadItemData() {
+    try {
+      const response = await fetch('./assets/Item.json');
+      const data = await response.json();
+      this.items = data.data;
+    } catch (error) {
+      console.error('Failed to load item data:', error);
+    }
+  }
+
+
+
+  // 현재 스테이지 ID에 해당하는 데이터를 반환
+  getCurrentStageData() {
+    return this.stageData.find(stage => stage.id === this.stageId) || { score: 0, scoreMultiplier: 1 };
+  }
+
+  getItem(itemId) {
+    // 아이템을 획득하면 특정 동작을 수행
+    console.log(`아이템 ${itemId}를 획득했습니다.`);
+    // 여기에 획득한 아이템에 대한 추가 동작을 추가할 수 있습니다.
+  }
+  
+  createItems() {
+    const currentStageItems = this.getCurrentStageItems();
+    // 여기서 생성된 아이템을 활용하여 필요한 로직 수행
+    console.log('현재 스테이지 아이템:', currentStageItems);
   }
 
   update(deltaTime) {
+    const currentStage = this.getCurrentStageData();
     this.score += deltaTime * 0.001;
     // 점수가 100점 이상이 될 시 서버에 메세지 전송
     if (Math.floor(this.score) === 100 && this.stageChange) {
       this.stageChange = false;
-      sendEvent(11, { currentStage: 1000, targetStage: 1001 });
+      const nextStageId = this.stageId + 1;
+      sendEvent(11, { currentStage: this.stageId, targetStage: nextStageId });
     }
-  }
-
-  getItem(itemId) {
-    this.score += 10;
   }
 
   reset() {
     this.score = 0;
+    this.stageChange = true;
   }
 
   setHighScore() {
