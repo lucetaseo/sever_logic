@@ -3,8 +3,8 @@ import Ground from './Ground.js';
 import CactiController from './CactiController.js';
 import Score from './Score.js';
 import ItemController from './ItemController.js';
-import "./socket.js";
-import { sendEvent } from './socket.js';
+import './Socket.js';
+import { sendEvent } from './Socket.js';
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
@@ -17,9 +17,8 @@ const GAME_WIDTH = 800;
 const GAME_HEIGHT = 200;
 
 // 플레이어
-// 800 * 200 사이즈의 캔버스에서는 이미지의 기본크기가 크기때문에 1.5로 나눈 값을 사용. (비율 유지)
-const PLAYER_WIDTH = 88 / 1.5; // 58
-const PLAYER_HEIGHT = 94 / 1.5; // 62
+const PLAYER_WIDTH = 88 / 1.5;
+const PLAYER_HEIGHT = 94 / 1.5;
 const MAX_JUMP_HEIGHT = GAME_HEIGHT;
 const MIN_JUMP_HEIGHT = 150;
 
@@ -166,7 +165,7 @@ function reset() {
   score.reset();
   gameSpeed = GAME_SPEED_START;
   // 게임시작 핸들러ID 2, payload 에는 게임 시작 시간
- sendEvent(2, { timestamp: Date.now() });
+  sendEvent(2, { timestamp: Date.now() });
 }
 
 function setupGameReset() {
@@ -208,7 +207,6 @@ function gameLoop(currentTime) {
     // 달리기
     player.update(gameSpeed, deltaTime);
     updateGameSpeed(deltaTime);
-
     score.update(deltaTime);
   }
 
@@ -217,6 +215,7 @@ function gameLoop(currentTime) {
     score.setHighScore();
     setupGameReset();
   }
+
   const collideWithItem = itemController.collideWith(player);
   if (collideWithItem && collideWithItem.itemId) {
     score.getItem(collideWithItem.itemId);
