@@ -5,7 +5,7 @@ export const gameStart = (uuid, payload) => {
    // 서버 메모리에 있는 게임 에셋에서 stage 정보를 가지고 온다.
    const { stages } = getGameAssets();
    // stages 배열에서 0번째 = 첫번째스테이지 의 ID를 해당 유저의 stage에 저장한다.
-   setStage(uuid, stages.data[0].id,payload.timestamp);
+   setStage(uuid, stages.data[0].id, payload.timestamp);
    // 로그를 찍어 확인.
    console.log('Stage:', getStage(uuid));
 
@@ -32,8 +32,10 @@ export const gameEnd = (uuid, payload) => {
       // 다음 스테이지의 시작 시간을 현재 스테이지의 종료 시간으로 사용
       stageEndTime = stages[index + 1].timestamp;
     }
+
+    const stageData = getGameAssets().stages.data.find(s => s.id === stage.stageId);
     const stageDuration = (stageEndTime - stage.timestamp) / 1000; // 스테이지 지속 시간 (초 단위)
-    totalScore += stageDuration; // 1초당 1점
+    totalScore += stageDuration * stageData.scoreMultiplier; // 스테이지별 점수 배수 반영
   });
  
   // 점수와 타임스탬프 검증 (예: 클라이언트가 보낸 총점과 계산된 총점 비교)
@@ -46,4 +48,18 @@ export const gameEnd = (uuid, payload) => {
   // saveGameResult(userId, clientScore, gameEndTime);
   // 검증이 통과되면 게임 종료 처리
   return { status: 'success', message: 'Game ended successfully', score };
+};
+
+export const handleStageChange = (uuid, payload) => {
+  const { currentStage, targetStage } = payload;
+  const stages = getGameAssets().stages.data;
+
+  const newStage = stages.find(stage => stage.id === targetStage);
+  if (newStage) {
+    setStage(uuid, targetStage, Date.now());
+    console.log(`Stage changed to ${targetStage} for user ${uuid}`);
+    return { status: 'success', message: 'Stage changed successfully' };
+  } else {
+    return { status: 'fail', message: 'Invalid target stage' };
+  }
 };

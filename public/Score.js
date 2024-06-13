@@ -1,62 +1,52 @@
 import { sendEvent } from './Socket.js';
+import stageFile from './assets/Stage.json' with { type: 'json' };
 
 class Score {
   score = 0;
-  HIGH_SCORE_KEY = "highScore";
+  HIGH_SCORE_KEY = 'highScore';
   stageId = 1000; // 기본 스테이지 ID
   stageChange = true; // 스테이지 변경 가능 여부 초기화
+  stageData = stageFile.data;
 
   constructor(ctx, scaleRatio) {
     this.ctx = ctx;
     this.canvas = ctx.canvas;
     this.scaleRatio = scaleRatio;
   }
-  
-//  async loadStageData() {
-//    try {
-//      const response = await fetch('./assets/Stage.json');
-//      const data = await response.json();
-//      this.stageData = data.data;
-//    } catch (error) {
-//      console.error('Failed to load stage data:', error);
-//    }
-//  }
 
-//  async loadItemData() {
-//    try {
-//      const response = await fetch('./assets/Item.json');
-//      const data = await response.json();
-//      this.items = data.data; // 아이템 데이터를 클래스 변수에 저장
-//    } catch (error) {
-//      console.error('Failed to load item data:', error);
-//    }
-//  }
-
-// 현재 스테이지 ID에 해당하는 데이터를 반환
-//  getCurrentStageData() {
-//    return this.stageData.find(stage => stage.id === this.stageId) || { score: 0, scoreMultiplier: 1 };
-// }
-
-  // 아이템을 획득할 때 실행되는 메서드
-  getItem(itemId) {
-    // 아이템을 획득하면 특정 동작을 수행
-    console.log(`아이템 ${itemId}를 획득했습니다.`);
-    // 여기에 획득한 아이템에 대한 추가 동작을 추가할 수 있습니다.
+  // 현재 스테이지 ID에 해당하는 데이터를 반환
+  getCurrentStageData() {
+    return this.stageData.find(stage => stage.id === this.stageId) || { scorePerSecond: 1 };
   }
 
   update(deltaTime) {
-    this.score += deltaTime * 0.001;
-    // 점수가 100점 이상이 되면 이벤트를 발생시켜 다음 스테이지로 이동
-    if (Math.floor(this.score) === 100 && this.stageChange) {
-      this.stageChange = true;
-      const nextStageId = this.stageId + 1;
-      sendEvent(11, { currentStage: this.stageId, targetStage: nextStageId });
+    const currentStage = this.getCurrentStageData();
+    this.score += deltaTime * 0.001 * currentStage.scorePerSecond;
+    // 점수가 10 이상이 되면 다음 스테이지로 이동
+    if (Math.floor(this.score) >= 10 && this.stageChange) {
+      this.stageChange = false; // 스테이지 변경 가능 여부를 false로 설정
+
+      // 다음 스테이지 찾기
+      const nextStage = this.stageData.find(stage => stage.id === this.stageId + 1);
+      if (nextStage) {
+        sendEvent(11, { currentStage: this.stageId, targetStage: nextStage.id });
+        console.log(`Moved to stage ${nextStage.id}`);
+        this.stageId = nextStage.id; // 다음 스테이지로 변경
+      } else {
+        console.log(`No next stage found for id ${this.stageId + 1}`);
+      }
+
+      // 일정 시간 후에 스테이지 변경 가능 여부를 true로 설정
+      setTimeout(() => {
+        this.stageChange = true;
+      }, 1000); // 1초 후에 다시 스테이지 변경 가능
     }
   }
 
   reset() {
     this.score = 0;
     this.stageChange = true;
+    this.stageId = 1000; // 초기 스테이지 ID로 리셋
   }
 
   setHighScore() {
