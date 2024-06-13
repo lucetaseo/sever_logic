@@ -1,5 +1,15 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { getStage, setStage } from '../models/stage.model.js';
 import { getGameAssets } from '../init/assets.js';
+
+// __filename 및 __dirname을 ESM에서 사용하기 위한 설정
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// 상대 경로를 사용하여 JSON 파일 가져오기
+import itemUnlockData from '../../assets/Item_unlock.json' assert { type: 'json' };
+import itemData from '../../assets/Item.json' assert { type: 'json' };
 
 export const moveStageHandler = (userId, payload) => {
   // 유저의 현재 스테이지 배열을 가져오고, 최대 스테이지 ID를 찾는다.
@@ -43,6 +53,15 @@ export const moveStageHandler = (userId, payload) => {
 
   // 유저의 다음 스테이지 정보 업데이트 + 현재 시간
   setStage(userId, targetStage, serverTime);
+
+  // 다음 스테이지에 해당하는 아이템 로드
+  const stageItems = itemUnlockData
+    .filter(item => item.stage_id === targetStage)
+    .map(item => itemData.find(i => i.id === item.item_id))
+    .filter(item => item);
+
+  console.log('Items for stage:', targetStage, stageItems);
   console.log('Stage:', getStage(userId));
+  
   return { status: 'success' };
 };
